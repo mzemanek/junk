@@ -1,0 +1,8 @@
+# Ignore GCC related files.
+
+*.a
+*.matrix
+*.o
+*.orig
+
+matrix

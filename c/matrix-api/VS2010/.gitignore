@@ -1,0 +1,10 @@
+# Ignore Visual Studio 2010 related files.
+
+*.opensdf
+*.sdf
+*.suo
+*.user
+
+Debug/
+Release/
+ipch/
