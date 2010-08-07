@@ -12,6 +12,7 @@ int test_5(int argc, char *argv[]);
 int test_6(int argc, char *argv[]);
 int test_7(int argc, char *argv[]);
 int test_8(int argc, char *argv[]);
+int test_9(int argc, char *argv[]);
 
 // Dictionary of test functions.
 static const char *test_functionInfos[] =
@@ -24,6 +25,7 @@ static const char *test_functionInfos[] =
    "6 - Transpose a given matrix.",
    "7 - Create identiy matrix for a given matrix.",
    "8 - Subtract a given matrix from identity matrix.",
+   "9 - Run a given matrix through the Gauss' elemination algorithm.",
    NULL
 };
 
@@ -36,7 +38,8 @@ static const test_functionPtr test_functions[] =
    &test_5,
    &test_6,
    &test_7,
-   &test_8
+   &test_8,
+	&test_9
 };
 
 #endif

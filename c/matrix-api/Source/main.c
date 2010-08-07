@@ -41,7 +41,9 @@ typedef struct _arguments
 //
 void clear_console(void);
 void dump_arguments(int argc, char** argv);
+int add(const arguments *args);
 int E(const arguments *args);
+int gea(const arguments *args);
 int multiply(const arguments *args);
 int subtract(const arguments *args);
 int transpose(const arguments *args);
@@ -174,6 +176,13 @@ bool parse_arguments(arguments *args, int argc, char *argv[])
 			args->filespec_1st = argv[2];
 			return parse_argument_output(args, argc, argv, 3);
 		}
+		else if ((0 == strcmp("gea", argv[1])) && (2 < argc))
+		{
+			// gea <filespec> [<filespec>]
+			args->exec = &gea;
+			args->filespec_1st = argv[2];
+			return parse_argument_output(args, argc, argv, 3);
+		}
 		else if ((0 == strcmp("multiply", argv[1])) && (3 < argc))
 		{
 			// multiply <filespec> <filespec> [<filespec>]
@@ -295,6 +304,73 @@ int E(const arguments *args)
 			else
 			{
 				// ERROR: matrix_get_identity_matrix(...) failed.
+				status = 3;
+			}
+
+			matrix_free(&A);
+		}
+		else
+		{
+			// ERROR: Failed to load args->filespec_1st.
+			status = 2;
+		}
+	}
+
+	printf("> E %s.\n", (status) ? "failed" : "succeeded");
+	return status;
+}
+
+int gea(const arguments *args)
+{
+	int status = 0;
+
+	// Validate input parameters.
+	if ((NULL == args) || (NULL == args->filespec_1st))
+	{
+		// Invalid parameter(s).
+		return 1;
+	}
+
+	// Write introduction to console.
+	printf("> gea \"%s\" \"%s\"\n", args->filespec_1st, args->filespec_out);
+
+	// Gauss' elemeniation algorithmn.
+	if (0 == status)
+	{
+		matrix A = MATRIX_EMPTY;
+		matrix result = MATRIX_EMPTY;
+
+		if (matrix_read(&A, args->filespec_1st))
+		{
+			matrix_fprint(&A, stdout);
+			
+			if (matrix_gea_matrix(&A, &result))
+			{
+				// Write to console.
+				matrix_fprint(&result, stdout);
+				// write to output file.
+				if (NULL != args->filespec_out)
+				{
+					FILE * output = NULL;
+
+					output = fopen(args->filespec_out, "wt");
+					if (NULL != output)
+					{
+						matrix_fprint(&result, output);
+						fclose(output);
+					}
+					else
+					{
+						// ERROR: Failed to write output.
+						status = 4;
+					}
+				}
+
+				matrix_free(&result);
+			}
+			else
+			{
+				// ERROR: matrix_gea_matrix(...) failed.
 				status = 3;
 			}
 

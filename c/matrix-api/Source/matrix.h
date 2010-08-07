@@ -4,10 +4,11 @@
 // Matrix Application Programming Interface (API)
 
 #define MATRIX_EMPTY {NULL, 0, 0, NULL}
+#define MATRIX_ELEMENT_FORMAT "%5.2f"
 
 // Define input and output format strings for matrix elements.
 static const char *matrix_element_input = "%f";
-static const char *matrix_element_output = "\t%5.2f";
+static const char *matrix_element_output = "\t" MATRIX_ELEMENT_FORMAT;
 static const float matrix_element_one = 1.0F;
 static const float matrix_element_zero = 0.0F;
 
@@ -34,6 +35,7 @@ typedef struct _matrix
 // We want to be able to:
 // Create a m x n-matrix from scratch.
 matrix_status matrix_alloc(matrixPtr instance, const char *caption, size_t m, size_t n);
+matrix_status matrix_clone(matrixPtr instance, const char *caption, matrixPtr source);
 matrix_status matrix_free(matrixPtr instance);
 
 // Print a m x n-matrix to file or console (using stdout) respectively.
@@ -65,6 +67,9 @@ matrix_status matrix_math_add(matrixPtr instanceA, matrixPtr instanceB, matrixPt
 
 // Subtract matrices.
 matrix_status matrix_math_subtract(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result);
+
+// Gauss elemination algorithm.
+matrix_status matrix_gea_matrix(matrixPtr instance, matrixPtr result);
 
 // Create matrix E from a given matrix
 matrix_status matrix_identity_matrix(matrixPtr instance, matrixPtr E);

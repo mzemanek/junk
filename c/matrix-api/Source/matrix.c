@@ -53,6 +53,32 @@ matrix_status matrix_alloc(matrixPtr instance, const char *caption, size_t m, si
 	return matrix_status_succeeded;
 }
 
+matrix_status matrix_clone(matrixPtr instance, const char *caption, matrixPtr source)
+{
+	// Validate input parameters.
+	if ((NULL == instance) || (NULL == caption) || (NULL == source))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	if (matrix_alloc(instance, caption, source->m, source->n))
+	{
+		size_t count = source->m * source->n;
+		size_t i = 0;
+
+		// Clone elements.
+		for (i = 0; i < count; i++)
+		{
+			*(instance->elementsPtr + i) = *(source->elementsPtr + i);
+		}
+
+		return matrix_status_succeeded;
+	}
+
+	return matrix_status_failed;
+}
+
 matrix_status matrix_free(matrixPtr instance)
 {
 	// Validate input parameters.
@@ -465,6 +491,125 @@ matrix_status matrix_math_transpose(matrixPtr instance, matrixPtr result)
 		}
 	}
 
+	return matrix_status_succeeded;
+}
+
+matrix_status matrix_gea_matrix(matrixPtr instance, matrixPtr result)
+{
+	char caption[BUFSIZ] = {'\0'};
+
+	// Validate input parameters.
+	if ((NULL == instance) || (NULL == result))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// Construct new caption.
+	strncpy(caption, instance->caption, BUFSIZ);
+	strncat(caption, " (GEA'ed)", BUFSIZ);
+
+	// Clone instance result.
+	if (!matrix_clone(result, caption, instance))
+	{
+		// ERROR: matrix_alloc(...) failed.
+		return matrix_status_failed;
+	}
+
+	// GEA implementation
+	{
+		size_t mark_col = 0;
+		size_t mark_row = 0;
+		matrix_element *markPtr = NULL;
+
+		// Move diagonal over the matrix.
+		printf("> 1st Sequence\n");
+		for (mark_row = 0, mark_col = 0; (mark_row < result->m) && (mark_col < result->n - 1); mark_row++, mark_col++)
+		{
+			// Move marker to element.
+			markPtr = result->elementsPtr + (mark_row * result->n) + mark_col;
+			
+			// mark is unbound in case its 0.
+			if (matrix_element_zero == *markPtr)
+			{
+				printf("> Row %d: Unbound variable x%d!\n", mark_row + 1, mark_col + 1);
+
+				// Reset row mark to continue on next column of same row.
+				mark_row--;
+				continue;
+			}
+
+			// Set mark to 1 and recalculate other row values.
+			// Skip row in case mark is already 1.
+			if (matrix_element_one != *markPtr)
+			{
+				size_t col = 0;
+				matrix_element value = *markPtr;
+
+				printf("> Row %d / " MATRIX_ELEMENT_FORMAT "\n", mark_row + 1, value);
+				for (col = 0; mark_col + col < result->n; col++)
+				{
+					*(markPtr + col) = *(markPtr + col) / value;
+				}
+			}
+			else
+			{
+				printf("> Row %d: Unchanged.\n", mark_row + 1);
+			}
+
+			// Set columns underneath to 0.
+			{
+				size_t col = 0;
+				size_t row = 0;
+				matrix_element value = matrix_element_zero;
+
+				for (row = 1; mark_row + row < result->m; row++)
+				{
+					// Retrieve row modificator.
+					value = *(markPtr + row * result->n);
+					printf("> Row %d - Row %d * (" MATRIX_ELEMENT_FORMAT ")\n", mark_row + row + 1, mark_row + 1, value);
+
+					// Recalculate other row values.
+					for (col = 0; mark_col + col < result->n; col++)
+					{
+						*(markPtr + (row * result->n) + col) = *(markPtr + (row * result->n) + col) - *(markPtr + col) * value;
+					}
+				}	
+			}
+
+			matrix_fprint(result, stdout);
+		}
+
+		// Move diagonal over the matrix.
+		printf("> 2nd Sequence\n");
+		for (mark_row = result->m - 1, mark_col = result->n - 2; mark_row > 0; mark_row--, mark_col--)
+		{
+			// Move marker to element.
+			markPtr = result->elementsPtr + (mark_row * result->n) + mark_col;
+			
+			// Set columns above to 0.
+			{
+				size_t col = 0;
+				size_t row = 0;
+				matrix_element value = matrix_element_zero;
+
+				for (row = 1; (int)mark_row - (int)row >= 0; row++)
+				{
+					value = *(markPtr - row * result->n);
+					printf("> Row %d - Row %d * (" MATRIX_ELEMENT_FORMAT ")\n", mark_row - row + 1, mark_row + 1, value);
+
+					// Recalculate other row values.
+					for (col = 0; mark_col + col < result->n; col++)
+					{
+						*(markPtr - (row * result->n) + col) = *(markPtr - (row * result->n) + col) - *(markPtr + col) * value;
+					}
+				}	
+			}
+
+			matrix_fprint(result, stdout);
+		}
+	}
+	
 	return matrix_status_succeeded;
 }
 

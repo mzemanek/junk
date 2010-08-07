@@ -278,3 +278,49 @@ int test_8(int argc, char *argv[])
 
 	return 1;
 }
+
+int test_9(int argc, char *argv[])
+{
+   matrix A = MATRIX_EMPTY;
+
+	// Test case description.
+	printf("test_1(...)\n");
+	printf("> Allocate 3 x 4-matrix.\n");
+	printf("> Run it through Gauss' elemination algorithm.\n");
+
+	if (matrix_alloc(&A, "Sample matrix", 3, 4))
+	{
+		matrix result = MATRIX_EMPTY;
+      matrix_element elements[] =
+		{
+			1.0F, -2.0F, 3.0F, 7.0F,
+			-1.0F, -3.0F, 1.0F, -2.0F,
+			2.0, 4.0, -1.0, 3.0F
+		};
+
+		// Populate matrix.
+		matrix_set_all(&A, elements);
+
+		// Print matrix to console.
+		matrix_fprint(&A, stdout);
+
+		// Run it through GEA.
+		if (matrix_gea_matrix(&A, &result))
+		{
+			matrix_fprint(&result, stdout);
+			matrix_free(&result);
+		}
+		else
+		{
+			printf("> matrix_gea_matrix(...) failed.\n");
+		}
+
+		matrix_free(&A);
+	}
+	else
+	{
+		printf("> matrix_alloc(...) failed.\n");
+	}
+
+	return 1;
+}
