@@ -74,5 +74,15 @@ matrix_status matrix_gea_matrix(matrixPtr instance, matrixPtr result);
 // Create matrix E from a given matrix
 matrix_status matrix_identity_matrix(matrixPtr instance, matrixPtr E);
 
-// Scalar product of two vectors
+// Swap two cols/rows within a matrix.
+matrix_status matrix_swap_cols(matrixPtr instance, size_t swap, size_t with);
+matrix_status matrix_swap_rows(matrixPtr instance, size_t swap, size_t with);
+
+// Invert a matrix.
+matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result);
+
+// Merge two matrices extending columns.
+matrix_status matrix_transform_hmerge(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result);
+
+// TODO: Scalar product of two vectors
 #endif

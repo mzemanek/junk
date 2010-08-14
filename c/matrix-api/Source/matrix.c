@@ -708,3 +708,188 @@ matrix_status matrix_math_subtract(matrixPtr instanceA, matrixPtr instanceB, mat
 
 	return matrix_status_succeeded;
 }
+
+matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result)
+{
+	matrix E = MATRIX_EMPTY;
+	matrix EA = MATRIX_EMPTY;
+	matrix AE = MATRIX_EMPTY;
+
+	// Validate input parameters.
+	if ((NULL == instance) || (NULL == result))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// PREREQUISITE: Only quadratic matrices can be inverted.
+	if (instance->m != instance->n)
+	{
+		printf("! Matrix has to be quadratic to be invertable.\n");
+		// ERROR: Invalid operation.
+ 		return matrix_status_failed;
+	}
+
+	// Extend matrix by its identiy matrix.
+	if (!matrix_identity_matrix(instance, &E))
+	{
+		printf("! matrix_identity_matrix(...) failed.\n");
+		// ERROR: matrix_identity_matrix(...) failed.
+		return matrix_status_failed;
+	}
+
+	matrix_fprint(&E, stdout);
+
+	if (!matrix_transform_hmerge(instance, &E, &AE))
+	{
+		printf("! matrix_transform_hmerge(...) failed.\n");
+
+		// Free already allocated resources.
+		matrix_free(&E);
+
+		// ERROR: matrix_transform_hmerge(...) failed.
+		return matrix_status_failed;
+	}
+
+	matrix_fprint(&AE, stdout);
+
+	// Run extended matrix through GEA.
+	if (!matrix_gea_matrix(&AE, &EA))
+	{
+		printf("! matrix_gea_matrix(...) failed.\n");
+
+		// Free already allocated resources.
+		matrix_free(&AE);
+		matrix_free(&E);
+
+		// ERROR: matrix_gea_matrix(...) failed.
+		return matrix_status_failed;
+	}
+
+	matrix_fprint(&EA, stdout);
+
+	// Extract inverted matrix.
+
+	// Clean up.
+	matrix_free(&EA);
+	matrix_free(&AE);
+	matrix_free(&E);
+
+	// TODO: Implement.
+	return matrix_status_failed;
+}
+
+matrix_status matrix_transform_hmerge(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result)
+{
+	char caption[BUFSIZ] = {'\0'};
+	size_t cols = 0;
+
+	// Validate input paramters.
+	if ((NULL == instanceA) || (NULL == instanceB) || (NULL == result))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// Both matrices have to have same row count.
+	if (instanceA->m != instanceB->m)
+	{
+		printf("! Row count does not match.\n");
+		// ERROR: Invalid operation.
+		return matrix_status_failed;
+	}
+
+	// Construct new caption.
+	strncpy(caption, instanceA->caption, BUFSIZ);
+	strncat(caption, " | ", BUFSIZ);
+	strncat(caption, instanceB->caption, BUFSIZ);
+	
+	// Allocate result.
+	cols = instanceA->n + instanceB->n;
+	if (!matrix_alloc(result, caption, instanceA->m, cols))
+	{
+		printf("! matrix_alloc(...) failed.\n");
+		// ERROR: matrix_alloc(...) failed.
+		return matrix_status_failed;
+	}
+	
+	// Copy values, keep in mind that matrix get() and set() are 1-based!
+	{
+		size_t r = 0;
+		size_t c = 0;
+		matrix_element value = matrix_element_zero;
+
+		// Copy values.
+		for (r = 1; r <= instanceA->m; r++)
+		{
+			// Copy values from first instance.
+			for (c = 1; c <= instanceA->n; c++)
+			{
+				matrix_get(instanceA, r, c, &value);
+				matrix_set(result, r, c, value);
+			}
+
+			// Copy values from second instance.
+			for (c = 1; c <= instanceB->n; c++)
+			{
+				matrix_get(instanceB, r, c, &value);
+				matrix_set(result, r, c + instanceA->n, value);
+			}
+		}
+	}
+		
+	return matrix_status_succeeded;
+}
+
+matrix_status matrix_swap_cols(matrixPtr instance, size_t swap, size_t with)
+{
+	// Validate input parameters.
+	if ((NULL == instance) || (0 == swap) || (0 == with) || (swap > instance->n) || (with > instance->n))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// Check if anything has to be done at all.
+	if (swap == with)
+	{
+		return matrix_status_succeeded;
+	}
+
+	// Since we use pointers, 0-base input variables.
+	swap--;
+	with--;
+
+	// Swap values.
+	{
+		size_t i = 0;
+		size_t offset = 0;
+		matrix_element temp = matrix_element_zero;
+		matrix_element *swapPtr = NULL;
+		matrix_element *withPtr = NULL;
+
+printf("! ");
+		swapPtr = instance->elementsPtr + swap;
+		withPtr = instance->elementsPtr + with;
+		for (i = 0, offset = 0; i < instance->m; i++, offset = i * instance->n)
+		{
+printf("\t%d-%d", i, offset);
+			// Move value pointers.
+			swapPtr += offset;
+			withPtr += offset;
+
+			temp = *swapPtr;
+			*swapPtr = *withPtr;
+			*withPtr = temp;
+		}
+printf("\n");
+	}
+
+	return matrix_status_succeeded;
+}
+
+matrix_status matrix_swap_rows(matrixPtr instance, size_t swap, size_t with)
+{
+	// TODO: Implement.
+	return matrix_status_failed;
+}

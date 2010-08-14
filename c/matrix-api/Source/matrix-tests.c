@@ -284,7 +284,7 @@ int test_9(int argc, char *argv[])
    matrix A = MATRIX_EMPTY;
 
 	// Test case description.
-	printf("test_1(...)\n");
+	printf("test_9(...)\n");
 	printf("> Allocate 3 x 4-matrix.\n");
 	printf("> Run it through Gauss' elemination algorithm.\n");
 
@@ -313,6 +313,139 @@ int test_9(int argc, char *argv[])
 		else
 		{
 			printf("> matrix_gea_matrix(...) failed.\n");
+		}
+
+		matrix_free(&A);
+	}
+	else
+	{
+		printf("> matrix_alloc(...) failed.\n");
+	}
+
+	return 1;
+}
+
+int test_10(int argc, char *argv[])
+{
+matrix A = MATRIX_EMPTY;
+
+	// Test case description.
+	printf("test_10(...)\n");
+	printf("> Allocate and invert a 3 x 3-matrix.\n");
+
+	if (matrix_alloc(&A, "Sample matrix", 3, 3))
+	{
+		matrix result = MATRIX_EMPTY;
+      matrix_element elements[] =
+		{
+			 3.0F,	 0.0F,	-6.0F,
+			 0.0F,	 0.0F,	 1.0F,
+			 3.0F,	 1.0F,	-1.0F
+		};
+
+		// Populate matrix.
+		matrix_set_all(&A, elements);
+
+		// Print matrix to console.
+		matrix_fprint(&A, stdout);
+
+		// Invert matrix.
+		if (matrix_transform_invert(&A, &result))
+		{
+			matrix_fprint(&result, stdout);
+			matrix_free(&result);
+		}
+		else
+		{
+			printf("> matrix_transform_invert(...) failed.\n");
+		}
+
+		matrix_free(&A);
+	}
+	else
+	{
+		printf("> matrix_alloc(...) failed.\n");
+	}
+
+	return 1;
+}
+
+int test_11(int argc, char *argv[])
+{
+	matrix A = MATRIX_EMPTY;
+
+	// Test case description.
+	printf("test_11(...)\n");
+	printf("> Allocate and swap second and third column of a 4 x 4-matrix.\n");
+
+	if (matrix_alloc(&A, "Sample matrix", 4, 4))
+	{
+      matrix_element elements[] =
+		{
+			 1.1F,	 1.2F,	 1.3F,	 1.4F,
+			 2.1F,	 2.2F,	 2.3F,	 2.4F,
+			 3.1F,	 3.2F,	 3.3F,	 3.4F,
+			 4.1F,	 4.2F,	 4.3F,	 4.4F
+		};
+
+		// Populate matrix.
+		matrix_set_all(&A, elements);
+
+		// Print matrix to console.
+		matrix_fprint(&A, stdout);
+
+		// Swap second and third row.
+		if (matrix_swap_cols(&A, 2, 3))
+		{
+			matrix_fprint(&A, stdout);
+		}
+		else
+		{
+			printf("> matrix_swap_cols(...) failed.\n");
+		}
+
+		matrix_free(&A);
+	}
+	else
+	{
+		printf("> matrix_alloc(...) failed.\n");
+	}
+
+	return 1;
+}
+
+int test_12(int argc, char *argv[])
+{
+	matrix A = MATRIX_EMPTY;
+
+	// Test case description.
+	printf("test_12(...)\n");
+	printf("> Allocate and swap second and third row of a 4 x 4-matrix.\n");
+
+	if (matrix_alloc(&A, "Sample matrix", 4, 4))
+	{
+      matrix_element elements[] =
+		{
+			 1.1F,	 1.2F,	 1.3F,	 1.4F,
+			 2.1F,	 2.2F,	 2.3F,	 2.4F,
+			 3.1F,	 3.2F,	 3.3F,	 3.4F,
+			 4.1F,	 4.2F,	 4.3F,	 4.4F
+		};
+
+		// Populate matrix.
+		matrix_set_all(&A, elements);
+
+		// Print matrix to console.
+		matrix_fprint(&A, stdout);
+
+		// Swap second and third row.
+		if (matrix_swap_rows(&A, 2, 3))
+		{
+			matrix_fprint(&A, stdout);
+		}
+		else
+		{
+			printf("> matrix_swap_rows(...) failed.\n");
 		}
 
 		matrix_free(&A);
