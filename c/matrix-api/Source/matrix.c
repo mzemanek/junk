@@ -865,24 +865,15 @@ matrix_status matrix_swap_cols(matrixPtr instance, size_t swap, size_t with)
 		size_t i = 0;
 		size_t offset = 0;
 		matrix_element temp = matrix_element_zero;
-		matrix_element *swapPtr = NULL;
-		matrix_element *withPtr = NULL;
+		matrix_element *swapPtr = instance->elementsPtr + swap;;
+		matrix_element *withPtr = instance->elementsPtr + with;;
 
-printf("! ");
-		swapPtr = instance->elementsPtr + swap;
-		withPtr = instance->elementsPtr + with;
 		for (i = 0, offset = 0; i < instance->m; i++, offset = i * instance->n)
 		{
-printf("\t%d-%d", i, offset);
-			// Move value pointers.
-			swapPtr += offset;
-			withPtr += offset;
-
-			temp = *swapPtr;
-			*swapPtr = *withPtr;
-			*withPtr = temp;
+			temp = *(swapPtr + offset);
+			*(swapPtr + offset) = *(withPtr + offset);
+			*(withPtr + offset) = temp;
 		}
-printf("\n");
 	}
 
 	return matrix_status_succeeded;
@@ -890,6 +881,37 @@ printf("\n");
 
 matrix_status matrix_swap_rows(matrixPtr instance, size_t swap, size_t with)
 {
-	// TODO: Implement.
-	return matrix_status_failed;
+	// Validate input parameters.
+	if ((NULL == instance) || (0 == swap) || (0 == with) || (swap > instance->m) || (with > instance->m))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// Check if anything has to be done at all.
+	if (swap == with)
+	{
+		return matrix_status_succeeded;
+	}
+
+	// Since we use pointers, 0-base input variables.
+	swap--;
+	with--;
+
+	// Swap values.
+	{
+		size_t i = 0;
+		matrix_element temp = matrix_element_zero;
+		matrix_element *swapPtr = instance->elementsPtr + swap * instance->n;;
+		matrix_element *withPtr = instance->elementsPtr + with * instance->n;;
+
+		for (i = 0; i < instance->n; i++)
+		{
+			temp = *(swapPtr + i);
+			*(swapPtr + i) = *(withPtr + i);
+			*(withPtr + i) = temp;
+		}
+	}
+
+	return matrix_status_succeeded;
 }
