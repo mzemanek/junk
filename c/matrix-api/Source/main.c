@@ -8,10 +8,13 @@
 // What is it what we are about to do:
 
 // Interpret command lines:
-// matrix [create] <filespec>
-// matrix [edit] <filespec>
-// matrix add <filespec> <filespec> [<filespec>]
-// matrix multiply <<filespec>|scalar> <filespec> [<filespec>]
+// TODO: matrix [create] <filespec>
+// TODO: matrix [edit] <filespec>
+// TODO: matrix add <filespec> <filespec> [<filespec>]
+// matrix gea <filespec> [<filespec>]
+// matrix gjea <filespec> [<filespec>]
+// matrix invert <filespec> [<filespec>]
+// matrix multiply <filespec>|scalar> <filespec> [<filespec>]
 // matrix subtract <filespec> <filespec> [<filespec>]
 // matrix transpose <filespec> [<filespec>]
 
@@ -44,6 +47,8 @@ void dump_arguments(int argc, char** argv);
 int add(const arguments *args);
 int E(const arguments *args);
 int gea(const arguments *args);
+int gjea(const arguments *args);
+int invert(const arguments *args);
 int multiply(const arguments *args);
 int subtract(const arguments *args);
 int transpose(const arguments *args);
@@ -180,6 +185,20 @@ bool parse_arguments(arguments *args, int argc, char *argv[])
 		{
 			// gea <filespec> [<filespec>]
 			args->exec = &gea;
+			args->filespec_1st = argv[2];
+			return parse_argument_output(args, argc, argv, 3);
+		}
+		else if ((0 == strcmp("gjea", argv[1])) && (2 < argc))
+		{
+			// gea <filespec> [<filespec>]
+			args->exec = &gjea;
+			args->filespec_1st = argv[2];
+			return parse_argument_output(args, argc, argv, 3);
+		}
+		else if ((0 == strcmp("invert", argv[1])) && (2 < argc))
+		{
+			// invert <filespec> [<filespec>]
+			args->exec = &invert;
 			args->filespec_1st = argv[2];
 			return parse_argument_output(args, argc, argv, 3);
 		}
@@ -334,7 +353,7 @@ int gea(const arguments *args)
 	// Write introduction to console.
 	printf("> gea \"%s\" \"%s\"\n", args->filespec_1st, args->filespec_out);
 
-	// Gauss' elemeniation algorithmn.
+	// Gauss' elimination algorithmn.
 	if (0 == status)
 	{
 		matrix A = MATRIX_EMPTY;
@@ -383,7 +402,141 @@ int gea(const arguments *args)
 		}
 	}
 
-	printf("> E %s.\n", (status) ? "failed" : "succeeded");
+	printf("> gea %s.\n", (status) ? "failed" : "succeeded");
+	return status;
+}
+
+int gjea(const arguments *args)
+{
+	int status = 0;
+
+	// Validate input parameters.
+	if ((NULL == args) || (NULL == args->filespec_1st))
+	{
+		// Invalid parameter(s).
+		return 1;
+	}
+
+	// Write introduction to console.
+	printf("> gjea \"%s\" \"%s\"\n", args->filespec_1st, args->filespec_out);
+
+	// Gauss-Jordan Elimination algorithmn.
+	if (0 == status)
+	{
+		matrix A = MATRIX_EMPTY;
+		matrix result = MATRIX_EMPTY;
+
+		if (matrix_read(&A, args->filespec_1st))
+		{
+			matrix_fprint(&A, stdout);
+			
+			if (matrix_transform_gjea(&A, &result))
+			{
+				// Write to console.
+				matrix_fprint(&result, stdout);
+				// write to output file.
+				if (NULL != args->filespec_out)
+				{
+					FILE * output = NULL;
+
+					output = fopen(args->filespec_out, "wt");
+					if (NULL != output)
+					{
+						matrix_fprint(&result, output);
+						fclose(output);
+					}
+					else
+					{
+						// ERROR: Failed to write output.
+						status = 4;
+					}
+				}
+
+				matrix_free(&result);
+			}
+			else
+			{
+				// ERROR: matrix_transform_gjea(...) failed.
+				status = 3;
+			}
+
+			matrix_free(&A);
+		}
+		else
+		{
+			// ERROR: Failed to load args->filespec_1st.
+			status = 2;
+		}
+	}
+
+	printf("> gjea %s.\n", (status) ? "failed" : "succeeded");
+	return status;
+}
+
+int invert(const arguments *args)
+{
+	int status = 0;
+
+	// Validate input parameters.
+	if ((NULL == args) || (NULL == args->filespec_1st))
+	{
+		// Invalid parameter(s).
+		return 1;
+	}
+
+	// Write introduction to console.
+	printf("> invert \"%s\" \"%s\"\n", args->filespec_1st, args->filespec_out);
+
+	// Invert matrix.
+	if (0 == status)
+	{
+		matrix A = MATRIX_EMPTY;
+		matrix result = MATRIX_EMPTY;
+
+		if (matrix_read(&A, args->filespec_1st))
+		{
+			matrix_fprint(&A, stdout);
+			
+			if (matrix_transform_invert(&A, &result))
+			{
+				// Write to console.
+				matrix_fprint(&result, stdout);
+				// write to output file.
+				if (NULL != args->filespec_out)
+				{
+					FILE * output = NULL;
+
+					output = fopen(args->filespec_out, "wt");
+					if (NULL != output)
+					{
+						matrix_fprint(&result, output);
+						fclose(output);
+					}
+					else
+					{
+						// ERROR: Failed to write output.
+						status = 4;
+					}
+				}
+
+				matrix_free(&result);
+			}
+			else
+			{
+				// ERROR: matrix_transform_invert(...) failed.
+				status = 3;
+			}
+
+			matrix_free(&A);
+		}
+		else
+		{
+			// ERROR: Failed to load args->filespec_1st.
+			status = 2;
+		}
+	}
+
+	printf("> invert %s.\n", (status) ? "failed" : "succeeded");
 	return status;
 }
 

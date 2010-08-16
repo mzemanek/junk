@@ -762,11 +762,9 @@ matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result)
 		matrix_free(&AE);
 		matrix_free(&E);
 
-		// ERROR: matrix_gea_matrix(...) failed.
+		// ERROR: matrix_transform_gjea(...) failed.
 		return matrix_status_failed;
 	}
-
-	matrix_fprint(&EA, stdout);
 
 	// Extract inverted matrix.
 	if (!matrix_transform_hcut(&EA, result, instance->n + 1, EA.n))
@@ -861,38 +859,46 @@ matrix_status matrix_transform_gjea(matrixPtr instance, matrixPtr result)
 					return matrix_status_failed;
 				}
 			}
-			else if (matrix_element_one == value)
-			{
-				// Skip whole row.
-				printf(">  Row %d: Skip.\n", i + 1);
-				matrix_fprint(result, stdout);
-				continue;
-			}
 			else
 			{
-				// Set current position to one.
-				*(result->elementsPtr + (i * result->n) + i) = matrix_element_one;
-
-				// Handle rest of current row.
-				printf(">  Row %d: Divide row by " MATRIX_ELEMENT_FORMAT "\n", i + 1, value);
-				for (j = i + 1; j < result->n; j++)
+				if (matrix_element_one == value)
 				{
-					*(result->elementsPtr + (i * result->n) + j) /= value;
+					// Skip whole row.
+					printf(">  Row* %d: Skip.\n", i + 1);
+				}
+				else
+				{
+					// Set current position to one.
+					*(result->elementsPtr + (i * result->n) + i) = matrix_element_one;
+
+					// Handle rest of current row.
+					printf(">  Row* %d: Divide row by " MATRIX_ELEMENT_FORMAT "\n", i + 1, value);
+					for (j = i + 1; j < result->n; j++)
+					{
+						*(result->elementsPtr + (i * result->n) + j) /= value;
+					}
 				}
 				
 				// Handle columns underneath.
-				for (j = (i * result->n) + result->n; j < result->m * result->n; j += result->n)
+				for (j = (i * result->n) + i + result->n; j < result->m * result->n; j += result->n)
 				{
 					// Store value (= coefficient for rest of row).
 					value = *(result->elementsPtr + j);
-					printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
-
-					// Substitute each column in the current row.
-					if (matrix_element_zero != value)
+					if (matrix_element_zero == value)
 					{
-						for (k = i; k < result->n; k++)
+						printf(">  Row %d: Skip.\n", j /result->n);
+					}
+					else
+					{
+						printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
+
+						// Substitute each column in the current row.
+						if (matrix_element_zero != value)
 						{
-							*(result->elementsPtr + j + (k - i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+							for (k = i; k < result->n; k++)
+							{
+								*(result->elementsPtr + j + (k - i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+							}
 						}
 					}
 				}
@@ -909,14 +915,21 @@ matrix_status matrix_transform_gjea(matrixPtr instance, matrixPtr result)
 			for (j = (i * result->n) + i - result->n; (int)j > 0; j -= result->n)
 			{
 				value = *(result->elementsPtr + j);
-				printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
-
-				// Substitute each column in the current row.
-				if (matrix_element_zero != value)
+				if (matrix_element_zero == value)
 				{
-					for (k = i; k < result->n; k++)
+					printf(">  Row %d: Skip.\n", j / result->n + 1);
+				}
+				else
+				{
+					printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
+
+					// Substitute each column in the current row.
+					if (matrix_element_zero != value)
 					{
-						*(result->elementsPtr + j + (k-i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+						for (k = i; k < result->n; k++)
+						{
+							*(result->elementsPtr + j + (k-i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+						}
 					}
 				}
 			}
@@ -957,7 +970,7 @@ matrix_status matrix_transform_hcut(matrixPtr instance, matrixPtr result, size_t
 	}
 	
 	// Create new caption.
-	sprintf(caption, "%s (cut %d - %d)", instance->caption, firstCol, lastCol);
+	sprintf(caption, "%s (hcut %d - %d)", instance->caption, firstCol, lastCol);
 
 	if (!matrix_alloc(result, caption, instance->m, 1 + lastCol - firstCol))
 	{

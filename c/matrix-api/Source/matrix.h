@@ -3,8 +3,8 @@
 
 // Matrix Application Programming Interface (API)
 
-#define MATRIX_EMPTY {NULL, 0, 0, NULL}
 #define MATRIX_ELEMENT_FORMAT "%5.2f"
+#define MATRIX_EMPTY {NULL, 0, 0, NULL}
 
 // Define input and output format strings for matrix elements.
 static const char *matrix_element_input = "%f";
