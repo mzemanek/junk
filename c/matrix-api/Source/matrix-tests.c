@@ -457,3 +457,49 @@ int test_12(int argc, char *argv[])
 
 	return 1;
 }
+
+int test_13(int argc, char *argv[])
+{
+	matrix A = MATRIX_EMPTY;
+
+	// Test case description.
+	printf("test_13(...)\n");
+	printf("> Cut columns two to three out off a 4 x 4-matrix.\n");
+
+	if (matrix_alloc(&A, "Sample matrix", 4, 4))
+	{
+		matrix result = MATRIX_EMPTY;
+      matrix_element elements[] =
+		{
+			 1.1F,	 1.2F,	 1.3F,	 1.4F,
+			 2.1F,	 2.2F,	 2.3F,	 2.4F,
+			 3.1F,	 3.2F,	 3.3F,	 3.4F,
+			 4.1F,	 4.2F,	 4.3F,	 4.4F
+		};
+
+		// Populate matrix.
+		matrix_set_all(&A, elements);
+
+		// Print matrix to console.
+		matrix_fprint(&A, stdout);
+
+		// Swap second and third row.
+		if (matrix_transform_hcut(&A, &result, 2, 3))
+		{
+			matrix_fprint(&result, stdout);
+			matrix_free(&result);
+		}
+		else
+		{
+			printf("> matrix_swap_rows(...) failed.\n");
+		}
+
+		matrix_free(&A);
+	}
+	else
+	{
+		printf("> matrix_alloc(...) failed.\n");
+	}
+
+	return 1;
+}

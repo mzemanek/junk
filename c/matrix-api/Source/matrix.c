@@ -753,10 +753,10 @@ matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result)
 
 	matrix_fprint(&AE, stdout);
 
-	// Run extended matrix through GEA.
-	if (!matrix_gea_matrix(&AE, &EA))
+	// Run extended matrix through Gauss-Jordan Elimination Algorithm.
+	if (!matrix_transform_gjea(&AE, &EA))
 	{
-		printf("! matrix_gea_matrix(...) failed.\n");
+		printf("! matrix_transform_gjea(...) failed.\n");
 
 		// Free already allocated resources.
 		matrix_free(&AE);
@@ -769,14 +769,222 @@ matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result)
 	matrix_fprint(&EA, stdout);
 
 	// Extract inverted matrix.
+	if (!matrix_transform_hcut(&EA, result, instance->n + 1, EA.n))
+	{
+		printf("! matrix_transform_hcut(...) failed.\n");
+
+		// Free already allocated resources.
+		matrix_free(&EA);
+		matrix_free(&AE);
+		matrix_free(&E);
+
+		// ERROR: matrix_transform_hcut(...) failed.
+		return matrix_status_failed;
+	}
 
 	// Clean up.
 	matrix_free(&EA);
 	matrix_free(&AE);
 	matrix_free(&E);
 
-	// TODO: Implement.
-	return matrix_status_failed;
+	return matrix_status_succeeded;
+}
+
+matrix_status matrix_transform_gjea(matrixPtr instance, matrixPtr result)
+{
+	char caption[BUFSIZ] = {'\0'};
+
+	// Validate input parameters.
+	if ((NULL == instance) || (NULL == result))
+	{
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// REQUIREMENT: Matrix has to have at least m + 1 columns.
+	if (instance->n < instance->m + 1)
+	{
+		printf("! Invalid matrix for Gauss-Jordan Elimination algorithm.\n");
+		// ERROR: Invalid operation.
+		return matrix_status_failed;
+	}
+
+	// Construct new caption.
+	strncpy(caption, instance->caption, BUFSIZ);
+	strncat(caption, " (GJEA'ed)", BUFSIZ);
+
+	// Clone result from instance.
+	if (!matrix_clone(result, caption, instance))
+	{
+		// ERROR: matrix_clone(...) failed.
+		return matrix_status_failed;
+	}
+
+	// Gauss-Jordan Elimination algorithm.
+	{
+		size_t i = 0;
+		size_t j = 0;
+		size_t k = 0;
+		matrix_element value = matrix_element_zero;
+
+		// Transform to row echelon form.
+		printf("> Transform to row echelon form.\n");
+		for (i = 0; i < result->m; i++)
+		{
+			value = *(result->elementsPtr + (i * result->n) + i);
+			if (matrix_element_zero == value)
+			{
+				if (i < result->m - 1)
+				{
+					// Swap with next row and try again (1-based!).
+					if (matrix_swap_rows(result, i + 1, i + 2))
+					{
+						printf(">  Row %d: Swap with next row and retry.\n", i + 1);
+						i--;
+						continue;
+					}
+					else
+					{
+						// Free allocated resources.
+						matrix_free(result);
+
+						printf("! matrix_swap_rows(...) failed.\n");
+						// ERROR: matrix_swap_rows(...) failed.
+						return matrix_status_failed;
+					}
+				}
+				else
+				{
+					// Last row reached, cannot be solved.
+					printf("! Unsolveable.\n");
+					matrix_free(result);
+					return matrix_status_failed;
+				}
+			}
+			else if (matrix_element_one == value)
+			{
+				// Skip whole row.
+				printf(">  Row %d: Skip.\n", i + 1);
+				matrix_fprint(result, stdout);
+				continue;
+			}
+			else
+			{
+				// Set current position to one.
+				*(result->elementsPtr + (i * result->n) + i) = matrix_element_one;
+
+				// Handle rest of current row.
+				printf(">  Row %d: Divide row by " MATRIX_ELEMENT_FORMAT "\n", i + 1, value);
+				for (j = i + 1; j < result->n; j++)
+				{
+					*(result->elementsPtr + (i * result->n) + j) /= value;
+				}
+				
+				// Handle columns underneath.
+				for (j = (i * result->n) + result->n; j < result->m * result->n; j += result->n)
+				{
+					// Store value (= coefficient for rest of row).
+					value = *(result->elementsPtr + j);
+					printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
+
+					// Substitute each column in the current row.
+					if (matrix_element_zero != value)
+					{
+						for (k = i; k < result->n; k++)
+						{
+							*(result->elementsPtr + j + (k - i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+						}
+					}
+				}
+
+				matrix_fprint(result, stdout);
+			}
+		}
+
+		// Transform to reduced row echelon form.
+		printf("> Transform to reduced row echelon form.\n");
+		for (i = result->m - 1; (int)i > 0; i--)
+		{
+			// Handle columns above.
+			for (j = (i * result->n) + i - result->n; (int)j > 0; j -= result->n)
+			{
+				value = *(result->elementsPtr + j);
+				printf(">  Row %d: Subtract %5.2f * row %d.\n", j / result->n + 1, value, i + 1);
+
+				// Substitute each column in the current row.
+				if (matrix_element_zero != value)
+				{
+					for (k = i; k < result->n; k++)
+					{
+						*(result->elementsPtr + j + (k-i)) -= *(result->elementsPtr + (i * result->n) + k) * value;
+					}
+				}
+			}
+
+			matrix_fprint(result, stdout);
+		}
+	}
+
+	return matrix_status_succeeded;
+}
+
+matrix_status matrix_transform_hcut(matrixPtr instance, matrixPtr result, size_t firstCol, size_t lastCol)
+{
+	char caption[BUFSIZ] = {'\0'};
+
+	// Validate input parameters.
+	if ((NULL == instance) || (NULL == result) || (0 == firstCol) || (0 == lastCol))
+	{
+		printf("! Invalid parameter(s).\n");
+		// ERROR: Invalid parameter(s).
+		return matrix_status_failed;
+	}
+
+	// REQUIREMENT: Check bounds.
+	if ((instance->n < firstCol) || (instance->n < lastCol))
+	{
+		printf("! Invalid operation.\n");
+		// ERROR: Invalid operation.
+		return matrix_status_failed;
+	}
+
+	// REQUIREMENT: At least one column has to be returned.
+	if (0 > (int)lastCol - (int)firstCol)
+	{
+		printf("! Invalid operation.\n");
+		// ERROR: Invalid operation.
+		return matrix_status_failed;
+	}
+	
+	// Create new caption.
+	sprintf(caption, "%s (cut %d - %d)", instance->caption, firstCol, lastCol);
+
+	if (!matrix_alloc(result, caption, instance->m, 1 + lastCol - firstCol))
+	{
+		printf("! matrix_alloc(...) failed.\n");
+		// ERROR: matrix_alloc(...) failed.
+		return matrix_status_failed;
+	}
+
+	// Align input to 0-based.
+	firstCol--;
+	lastCol--;
+
+	// Copy values.
+	{
+		size_t i = 0;
+		size_t j = 0;
+
+		for (i = 0; i < instance->m; i++)
+		{
+			for (j = 0; j <= lastCol - firstCol; j++)
+			{
+				*(result->elementsPtr + (i * result->n) + j) = *(instance->elementsPtr + (i * instance->n) + j + firstCol);
+			}
+		}
+	}
+
+	return matrix_status_succeeded;
 }
 
 matrix_status matrix_transform_hmerge(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result)

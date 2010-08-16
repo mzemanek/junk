@@ -16,6 +16,7 @@ int test_9(int argc, char *argv[]);
 int test_10(int argc, char *argv[]);
 int test_11(int argc, char *argv[]);
 int test_12(int argc, char *argv[]);
+int test_13(int argc, char *argv[]);
 
 // Dictionary of test functions.
 static const char *test_functionInfos[] =
@@ -31,7 +32,8 @@ static const char *test_functionInfos[] =
    "9 - Run a given matrix through the Gauss' elemination algorithm.",
 	"10- Invert a given matrix.",
 	"11- Swap second and third columns of a given matrix.",
-	"10- Swap second and third row of a given matrix.",
+	"12- Swap second and third row of a given matrix.",
+	"13- Cut a matrix out of a matrix.",
    NULL
 };
 
@@ -48,7 +50,8 @@ static const test_functionPtr test_functions[] =
 	&test_9,
 	&test_10,
 	&test_11,
-	&test_12
+	&test_12,
+	&test_13
 };
 
 #endif

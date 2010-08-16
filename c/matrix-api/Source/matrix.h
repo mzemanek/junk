@@ -68,7 +68,7 @@ matrix_status matrix_math_add(matrixPtr instanceA, matrixPtr instanceB, matrixPt
 // Subtract matrices.
 matrix_status matrix_math_subtract(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result);
 
-// Gauss elemination algorithm.
+// Gauss elemination algorithms.
 matrix_status matrix_gea_matrix(matrixPtr instance, matrixPtr result);
 
 // Create matrix E from a given matrix
@@ -78,10 +78,16 @@ matrix_status matrix_identity_matrix(matrixPtr instance, matrixPtr E);
 matrix_status matrix_swap_cols(matrixPtr instance, size_t swap, size_t with);
 matrix_status matrix_swap_rows(matrixPtr instance, size_t swap, size_t with);
 
+// Gauss-Jordan Elimination algorithm.
+matrix_status matrix_transform_gjea(matrixPtr instance, matrixPtr result);
+
 // Invert a matrix.
 matrix_status matrix_transform_invert(matrixPtr instance, matrixPtr result);
 
-// Merge two matrices extending columns.
+// Cut a matrix horizontally (= reduce columns).
+matrix_status matrix_transform_hcut(matrixPtr instance, matrixPtr result, size_t firstCol, size_t lastCol);
+
+// Merge two matrices horizontally (= extending columns).
 matrix_status matrix_transform_hmerge(matrixPtr instanceA, matrixPtr instanceB, matrixPtr result);
 
 // TODO: Scalar product of two vectors
