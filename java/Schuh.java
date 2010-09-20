@@ -8,6 +8,21 @@ public final class Schuh
 	
 	// Construction.
 	//
+	public Schuh()
+	{
+		this(0, "(unbenannt)");
+	}
+	
+	public Schuh(int groesse)
+	{
+		this(groesse, "(unbenannt)");
+	}
+	
+	public Schuh(int groesse, String modellbezeichnung)
+	{
+		this.groesse = groesse;
+		this.modellbezeichnung = modellbezeichnung;
+	}
 	
 	// Properties.
 	//
