@@ -1,6 +1,7 @@
 // 2010-11-15
 package messdaten;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class Messreihe
@@ -53,8 +54,13 @@ public class Messreihe
 		{
 			if (null != item)
 			{
-				System.out.println(item.getMessDatum() + ": " + item.getWert());
+				System.out.println(Messreihe.convertToString(item.getMessDatum()) + ": " + item.getWert());
 			}
 		}
+	}
+	
+	private static String convertToString(Calendar calendar)
+	{
+		return calendar.get(Calendar.DATE) + "." + calendar.get(Calendar.MONTH) + "." + calendar.get(Calendar.YEAR);
 	}
 }
