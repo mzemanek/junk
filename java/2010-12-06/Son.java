@@ -13,6 +13,7 @@ public class Son extends Father implements IExist
 			// TODO: Redundant.
 			// this.makeInnerObject();
 			this.myInnerObject = new InnerObject();
+			this.myInnerObject.print("Konstruktor Son mit True");
 		}
 		else
 		{
@@ -20,21 +21,19 @@ public class Son extends Father implements IExist
 			{
 				public void makeInnerObject()
 				{
-					System.out.println("Passende Ausgabe von makeInnerObject.");
-					myInnerObject = new InnerObject();
-					
+					System.out.println("Konstructor Son mit False, anonyme Klasse.");
+					//myInnerObject = new InnerObject();
 				}
 			};
 			
 			this.myExist.makeInnerObject();
 		}
-		
-		this.myInnerObject.print();
 	}
 	
 	public void makeInnerObject()
 	{
 		this.myInnerObject = new InnerObject();
+		this.myInnerObject.print("Inneres Objekt erzeugt.");
 	}
 	
 	public String iAmFather(String input)
@@ -48,7 +47,7 @@ public class Son extends Father implements IExist
 		{
 			public String iAmFather(String input)
 			{
-				return "der innere" + input;
+				return "der innere " + input;
 			}
 		};
 		
@@ -69,9 +68,10 @@ public class Son extends Father implements IExist
 	
 	private class InnerObject
 	{
-		public void print()
+		public void print(String message)
 		{
 			System.out.println("print() aus Son.InnerObject");
+			System.out.println("-> " + message);
 		}
 	}
 }

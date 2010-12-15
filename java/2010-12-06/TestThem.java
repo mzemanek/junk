@@ -5,23 +5,32 @@ public abstract class TestThem
 {
 	public static void main(String[] args)
 	{
-		Son subject[] = new Son[2];
+		Son subjects[] = new Son[2];
 		
-		subject[0] = new Son(true);
-		subject[0].iAmFather();
-		subject[0].iAmAlsoFather();
+		subjects[0] = new Son(true);
+		System.out.println(subjects[0].iAmFather("test 1"));
+		System.out.println(subjects[0].iAmAlsoFather("test 2"));
 		
-		subject[1] = new Son(false);
+		subjects[1] = new Son(false);
 		
-		for (int i = 0; i < subject.length; i++)
+		//for (Son subject : subjects)
+		for (int i = 0; i < subjects.length; i++)
 		{
-			if (i == 0)
+			Son subject = subjects[i];
+			try
 			{
-				subject[i].danger("danger");
+				if (i == 0)
+				{
+					subject.danger("danger");
+				}
+				else
+				{
+					subject.danger("lalala");
+				}
 			}
-			else
+			catch (SomeException ex)
 			{
-				subject[i].danger("lalala");
+				System.out.println(ex.getMessage());
 			}
 		}
 	}
