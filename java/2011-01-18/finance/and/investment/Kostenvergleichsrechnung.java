@@ -3,15 +3,40 @@ package finance.and.investment;
 
 public class Kostenvergleichsrechnung
 {
-	private float investition = 0.0f;
-	private int perioden = 0;
-	private float restwert = 0.0f;
+	private double investition = 0.0d;
+	private int nutzungsdauer = 0;
+	private double restwert = 0.0d;
+	
+	// Construction/Destruction.
+	//
+	public Kostenvergleichsrechnung(double investition, int nutzungsdauer)
+	{
+		this(investition, nutzungsdauer);
+	}
+	
+	// Properties.
+	//
+	public double getInvestition() { return this.investition; }
+	public void setInvestition(double value) { this.investition = value; }
+	
+	public int getNutzungsdauer() { return this.nutzungsdauer; }
+	public void setNutzungsdauer(int value) { this.nutzungsdauer = value; }
+	
+	public double getRestwert() { return this.restwert; }
+	public void setRestwert(double value) { this.restwert = value; }
+	
+	// Methods.
+	//
+	public String toString()
+	{
+		return super.toString();
+	}
 }
 
 /*
 	Kostenvergleichsrechnung
 	
-	Durchschnittlich gebundenes Kapital: 0.5 * I - Kn + R
+	Durchschnittlich gebundenes Kapital: 0.5 * I + Rn
 
 
 	Investition:	250 000.00	EUR

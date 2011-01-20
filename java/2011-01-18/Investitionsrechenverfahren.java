@@ -2,6 +2,7 @@
 // package finance.and.investment;
 
 import java.util.Scanner;
+import finance.and.investment.*;
 
 public final class Investitionsrechenverfahren
 {
@@ -112,7 +113,13 @@ final class Kostenvergleich extends Mode
 	{
 		System.out.println();
 		System.out.println();
-		System.out.println("Kostenvergleichsrechnung");
+		System.out.println("\tKostenvergleichsrechnung");
+		
+		Kosten k = null;
+		k = new Kosten(35768.52);
+		System.out.println(k);
+		System.out.println(new Kosten(0d));
+		System.out.println(new Kosten(2500d, .75d, 25000));
 		
 		return false;
 	}
