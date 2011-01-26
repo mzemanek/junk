@@ -3,9 +3,10 @@ package finance.and.investment;
 
 public class Kostenvergleichsrechnung
 {
-	private float investition = 0.0f;
-	private int perioden = 0;
-	private float restwert = 0.0f;
+	private double investition = 0.0d;
+	private int nutzungsdauer = 0;
+	private double restwert = 0.0d;
+	private double kalkulatorischerZins;
 }
 
 /*

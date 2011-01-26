@@ -3,19 +3,20 @@
 
 import java.io.*;
 import java.text.DateFormat;
-import java.util.Date;
 
 public abstract class info
 {
-	private static DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
-	
 	public static void main(String[] args)
 	{
 		final String fileName = "./info.txt";
 		
+		DateFormat dfm = null;
 		boolean exists = false;
 		FileWriter writer = null;
 	
+		// Initialize scope.
+		dfm = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
 		exists = check(fileName);
 		try
 		{
@@ -25,7 +26,7 @@ public abstract class info
 				writer.write(getInfo());
 			}
 			
-			writer.write(getTimestamp() + "\n");
+			writer.write(getTimestamp(dfm) + "\n");
 			writer.flush();
 		}
 		catch (IOException e)
@@ -75,8 +76,8 @@ public abstract class info
 		return propertyName + " = " + System.getProperty(propertyName) + "\n";
 	}
 	
-	private static String getTimestamp()
+	private static String getTimestamp(DateFormat dateFormat)
 	{
-		return dateFormat.format(new Date());
+		return dateFormat.format(new java.util.Date());
 	}
 }
