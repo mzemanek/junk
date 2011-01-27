@@ -1,4 +1,3 @@
-// 2011-01-26
 package finance.and.investment;
 
 public class Kosten
