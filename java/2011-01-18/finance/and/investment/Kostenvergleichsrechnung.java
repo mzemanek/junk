@@ -1,12 +1,16 @@
 // 2011-01-19
 package finance.and.investment;
 
+import java.math.*;
+
 public class Kostenvergleichsrechnung
 {
-	private double investition = 0.0d;
-	private int nutzungsdauer = 0;
-	private double restwert = 0.0d;
-	private double kalkulatorischerZins;
+	private BigDecimal investition = new BigDecimal();
+	private BigDecimal nutzungsdauer = new BigDecimal();
+	private BigDecimal restwert = new BigDecimal();
+	private BigDecimal variableKosten = new BigDecimal();
+	private BigDecimal zins = new BigDecimal("0.00");
+
 	
 	// Construction/Destruction.
 	//
