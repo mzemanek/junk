@@ -5,10 +5,12 @@ import java.io.*;
 
 public final class Writer extends Thread
 {
+	private int count = 0;
 	private Stack stack = null;
 	
-	public Writer(Stack stack)
+	public Writer(Stack stack, int count)
 	{
+		this.count = count;
 		this.stack = stack;
 	}
 	
@@ -16,9 +18,12 @@ public final class Writer extends Thread
 	{
 		try
 		{
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < count; i++)
 			{
-				this.stack.push(i);
+				int value = i + 1;
+				
+				this.stack.push(value);
+				System.out.println("Schreibe " + value);
 			}
 		}
 		catch (java.lang.InterruptedException ex)

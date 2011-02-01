@@ -12,12 +12,12 @@ public final class Test
 		// Initialize scope.
 		stack = new Stack(5);
 		reader = new Reader(stack);
-		writer = new Writer(stack);
+		writer = new Writer(stack, 25);
 		
 		reader.start();
 		writer.start();
 	
-		// Wait for all threads to finish.
+		// Wait for writer threads to finish.
 		try
 		{
 			writer.join();

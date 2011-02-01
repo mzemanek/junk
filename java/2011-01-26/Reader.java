@@ -18,7 +18,7 @@ public final class Reader extends Thread
 		{
 			while (true)
 			{
-				System.out.println("Wert = " + this.stack.pop());
+				System.out.println("Lese " + this.stack.pop());
 			}
 		}
 		catch (java.lang.InterruptedException ex)
