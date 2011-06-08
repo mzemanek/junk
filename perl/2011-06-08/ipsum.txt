@@ -1,0 +1,9 @@
+Das hier ist ipsum.txt
+
+ipsum
+ipsum
+
+#include "lorem.txt"
+
+ipsum
+ipsum

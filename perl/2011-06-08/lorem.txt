@@ -1,0 +1,7 @@
+Das ist lorem.txt
+
+lorem
+lorem
+lorem
+
+#include "lorem2.txt"
